@@ -8,11 +8,12 @@ import (
 	"time"
 
 	kivik "github.com/go-kivik/kivik/v4"
+	_ "github.com/go-kivik/kivik/v4/couchdb"
 )
 
 type Database struct {
 	Client *kivik.Client
-	DB *kivik.DB
+	DB     *kivik.DB
 }
 
 func ConnectDB() *Database {
@@ -26,58 +27,59 @@ func ConnectDB() *Database {
 
 	for i := 0; i < maxRetries; i++ {
 		client, err = kivik.New("couch", couchURL)
-		if err != nil {
+		if err == nil {
 			break
 		}
+
 		log.Printf("Failed to connect to CouchDB (attempt %d/%d): %v", i+1, maxRetries, err)
-		time.Sleep(time.Second * 2)
+		time.Sleep(2 * time.Second)
 	}
 	if err != nil {
-			log.Fatalf("Failed to connect to CouchDB after %d attempts: %v", maxRetries, err)
+		log.Fatalf("Failed to connect to CouchDB after %d attempts: %v", maxRetries, err)
 	}
 
 	ctx := context.Background()
 	version, err := client.Version(ctx)
 	if err != nil {
-        log.Fatalf("Failed to get CouchDB version: %v", err)
+		log.Fatalf("Failed to get CouchDB version: %v", err)
 	}
 	log.Printf("✓ Connected to CouchDB version: %s", version)
 
 	// Create database if not exists
 	exists, err := client.DBExists(ctx, dbName)
 	if err != nil {
-			log.Fatalf("Failed to check database existence: %v", err)
+		log.Fatalf("Failed to check database existence: %v", err)
 	}
 
 	if !exists {
-			if err := client.CreateDB(ctx, dbName); err != nil {
-					log.Fatalf("Failed to create database: %v", err)
-			}
-			log.Printf("✓ Database '%s' created", dbName)
+		if err := client.CreateDB(ctx, dbName); err != nil {
+			log.Fatalf("Failed to create database: %v", err)
+		}
+		log.Printf("✓ Database '%s' created", dbName)
 	} else {
-			log.Printf("✓ Using existing database '%s'", dbName)
+		log.Printf("✓ Using existing database '%s'", dbName)
 	}
 
 	db := client.DB(dbName)
 
 	return &Database{
-			Client: client,
-			DB:     db,
+		Client: client,
+		DB:     db,
 	}
 }
 
 func getEnv(key, defaultValue string) string {
-    if value := os.Getenv(key); value != "" {
-        return value
-    }
-    return defaultValue
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return defaultValue
 }
 
 func GetPort() string {
-    port := getEnv("APP_PORT", "3000")
-    return fmt.Sprintf(":%s", port)
+	port := getEnv("APP_PORT", "3000")
+	return fmt.Sprintf(":%s", port)
 }
 
 func GetEnv() string {
-    return getEnv("APP_ENV", "development")
+	return getEnv("APP_ENV", "development")
 }
