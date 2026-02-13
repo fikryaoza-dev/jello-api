@@ -76,7 +76,7 @@ func getEnv(key, defaultValue string) string {
 }
 
 func GetPort() string {
-	port := getEnv("APP_PORT", "3000")
+	port := getEnv("APP_PORT", "3013")
 	return fmt.Sprintf(":%s", port)
 }
 

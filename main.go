@@ -2,8 +2,9 @@ package main
 
 import (
 	"jello-api/config"
-	"jello-api/handler"
-	usecases "jello-api/usecase"
+	"jello-api/internal/handler"
+	"jello-api/internal/usecase"
+	"jello-api/response"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
@@ -24,8 +25,9 @@ func main() {
 	defer database.Client.Close()
 
 	app := fiber.New(fiber.Config{
-		AppName:      "Fiber CouchDB API v1.0.0",
+		AppName:      "Jello POS API v1.0.0",
 		ServerHeader: "Fiber",
+		ErrorHandler: response.FiberErrorHandler,
 	})
 
 	app.Use(recover.New())
@@ -37,7 +39,7 @@ func main() {
 		AllowMethods: "GET,POST,PUT,DELETE,OPTIONS",
 		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
 	}))
-	tableUsecase := usecases.NewTableUsecase(database)
+	tableUsecase := usecase.NewTableUsecase(database)
 	tableHandler := handler.NewTableHandler(tableUsecase)
 	// Routes
 	api := app.Group("/api/v1")
@@ -54,6 +56,12 @@ func main() {
 	api.Get("/tables", tableHandler.GetAllTables)
 	api.Get("/tables/status", tableHandler.GetTablesByStatus)
 
+	// PRINT ROUTES
+	log.Println("========== ROUTES ==========")
+	for _, r := range app.GetRoutes() {
+		log.Printf("➡️  %-6s | %s", r.Method, r.Path)
+	}
+	log.Println("============================")
 	port := config.GetPort()
 	log.Printf("🚀 Server starting on port %s", port)
 	log.Printf("📝 Environment: %s", config.GetEnv())

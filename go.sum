@@ -6,8 +6,6 @@ github.com/cenkalti/backoff/v4 v4.3.0 h1:MyRJ/UdXutAwSAT+s3wNd7MfTIcy71VQueUuFK3
 github.com/cenkalti/backoff/v4 v4.3.0/go.mod h1:Y3VNntkOUPxTVeUxJ/G5vcM//AlwfmyYozVcomhLiZE=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/go-kivik/couchdb/v4 v4.0.0-20230828195858-5c44e9a72d49 h1:btWohC0zDHSDJ4cgTpgAGubQdIk8goe3d7vGvlmhBYo=
-github.com/go-kivik/couchdb/v4 v4.0.0-20230828195858-5c44e9a72d49/go.mod h1:8HwNVdyXOfSgFnrSXf9qb1JkCirjo3hR+jEmdBnu9to=
 github.com/go-kivik/kivik/v4 v4.5.1 h1:qmhk+ksLc6rx2FddXHpJpCJTy3NkAL/IRFsFGhgkKRY=
 github.com/go-kivik/kivik/v4 v4.5.1/go.mod h1:ls+jIbwJK4GvvTqQ/hJyHkCV/ZFmVlIZH0m+zAE1vCc=
 github.com/gofiber/fiber/v2 v2.52.11 h1:5f4yzKLcBcF8ha1GQTWB+mpblWz3Vz6nSAbTL31HkWs=
