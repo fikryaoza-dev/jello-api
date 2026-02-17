@@ -5,7 +5,6 @@ import (
 )
 
 func FiberErrorHandler(c *fiber.Ctx, err error) error {
-
 	code := fiber.StatusInternalServerError
 	message := "Internal Server Error"
 
@@ -14,7 +13,7 @@ func FiberErrorHandler(c *fiber.Ctx, err error) error {
 		message = e.Message
 	}
 
-	return c.Status(code).JSON(APIResponse{
+	return c.Status(code).JSON(APIResponse[any]{
 		Meta: Meta{
 			Success: false,
 			Message: message,

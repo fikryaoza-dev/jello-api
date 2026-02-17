@@ -9,7 +9,10 @@ const (
 )
 
 type Table struct {
-	ID     string
-	Name   string
-	Status TableStatus
+	ID       string      `json:"id,omitempty"`
+	Rev      string      `json:"rev,omitempty"`
+	Name     string      `json:"name,omitempty"`
+	Capacity int         `json:"capacity"`
+	Area     string      `json:"area"`
+	Status   TableStatus `json:"status,omitempty"`
 }

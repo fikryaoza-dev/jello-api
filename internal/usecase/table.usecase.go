@@ -2,82 +2,74 @@ package usecase
 
 import (
 	"context"
-	"errors"
-	"jello-api/config"
-	"jello-api/internal/model"
+	"fmt"
+	"jello-api/internal/domain"
+	"jello-api/internal/repository"
+	"jello-api/internal/shared"
+	"log"
+	"time"
 )
 
 type TableUsecase struct {
-	DB *config.Database
+	Repo        repository.ITableRepository
+	BookingRepo repository.IBookingRepository
 }
 
-func NewTableUsecase(db *config.Database) *TableUsecase {
-	return &TableUsecase{DB: db}
+func NewTableUsecase(repo repository.ITableRepository, bookRepo repository.IBookingRepository) *TableUsecase {
+	return &TableUsecase{Repo: repo, BookingRepo: bookRepo}
 }
 
-func (u *TableUsecase) CreateTable(table *model.Table) (string, string, error) {
-	table.Type = "table"
-
-	if table.Status == "" {
-		table.Status = "available"
-	}
-
-	if table.Status != "available" && table.Status != "booked" && table.Status != "full" {
-		return "", "", errors.New("invalid status")
-	}
-
-	ctx := context.Background()
-	rev, err := u.DB.DB.Put(ctx, "", table)
+func (u *TableUsecase) CreateTable(ctx context.Context, table *domain.Table) error {
+	err := u.Repo.Create(ctx, table)
 	if err != nil {
-		return "", "", err
+		return err
 	}
 
-	return "", rev, nil
+	return nil
 }
 
-func (u *TableUsecase) GetAllTables() ([]model.Table, error) {
-	query := map[string]interface{}{
-		"selector": map[string]interface{}{
-			"type": "table",
-		},
+func (u *TableUsecase) GetAllTables(ctx context.Context, queries map[string]string, pagination shared.Pagination) ([]domain.Table, int, error) {
+	rows, total, err := u.Repo.GetAll(ctx, queries, pagination)
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to find tables: %w", err)
 	}
-
-	ctx := context.Background()
-	rows := u.DB.DB.Find(ctx, query)
-	defer rows.Close()
-
-	var tables []model.Table
-
-	for rows.Next() {
-		var t model.Table
-		if err := rows.ScanDoc(&t); err == nil {
-			tables = append(tables, t)
+	// 3️⃣ Ambil booking aktif di tanggal itu
+	now := time.Now().UTC()
+	today := time.Date(
+		now.Year(),
+		now.Month(),
+		now.Day(),
+		0, 0, 0, 0,
+		time.UTC,
+	)
+	if err != nil {
+		return nil, 0, fmt.Errorf("invalid date format")
+	}
+	bookings, err := u.BookingRepo.GetActiveByDate(ctx, today)
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to get bookings: %w", err)
+	}
+	bookingMap := make(map[string]bool)
+	for _, b := range bookings {
+		bookingMap[b.TableID] = true
+	}
+	for i := range rows {
+		log.Println(rows[i].ID, bookingMap[rows[i].ID])
+		if bookingMap[rows[i].ID] {
+			rows[i].Status = "available"
+		} else {
+			rows[i].Status = "booked"
 		}
 	}
-
-	return tables, nil
+	return rows, total, nil
 }
 
-func (u *TableUsecase) GetTablesByStatus(status string) ([]model.Table, error) {
-	query := map[string]interface{}{
-		"selector": map[string]interface{}{
-			"type":   "table",
-			"status": status,
-		},
+func (u *TableUsecase) GetTableByID(ctx context.Context, id string) (*domain.Table, error) {
+	// Get table from repository
+	table, err := u.Repo.GetByID(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find tables: %w", err)
 	}
 
-	ctx := context.Background()
-	rows := u.DB.DB.Find(ctx, query)
-	defer rows.Close()
-
-	var tables []model.Table
-
-	for rows.Next() {
-		var t model.Table
-		if err := rows.ScanDoc(&t); err == nil {
-			tables = append(tables, t)
-		}
-	}
-
-	return tables, nil
+	return table, nil
 }

@@ -1,9 +1,10 @@
 package main
 
 import (
+	"context"
 	"jello-api/config"
-	"jello-api/internal/handler"
-	"jello-api/internal/usecase"
+	"jello-api/internal/route"
+	"jello-api/pkg/couchdb"
 	"jello-api/response"
 	"log"
 
@@ -21,8 +22,12 @@ func main() {
 	} else {
 		log.Println(".env loaded successfully")
 	}
-	database := config.ConnectDB()
-	defer database.Client.Close()
+	ctx := context.Background()
+	dbClient, err := couchdb.NewClient(ctx)
+	if err != nil {
+		log.Fatalf("Failed to connect to CouchDB: %v", err)
+	}
+	defer dbClient.Client.Close()
 
 	app := fiber.New(fiber.Config{
 		AppName:      "Jello POS API v1.0.0",
@@ -39,8 +44,7 @@ func main() {
 		AllowMethods: "GET,POST,PUT,DELETE,OPTIONS",
 		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
 	}))
-	tableUsecase := usecase.NewTableUsecase(database)
-	tableHandler := handler.NewTableHandler(tableUsecase)
+	route.SetupRoutes(app, dbClient)
 	// Routes
 	api := app.Group("/api/v1")
 
@@ -49,12 +53,10 @@ func main() {
 		return c.JSON(fiber.Map{
 			"status":      "ok",
 			"message":     "Server is running",
-			"environment": config.GetEnv(),
+			"environment": config.GetEnv("APP_ENV", ""),
 		})
 	})
-	api.Post("/tables", tableHandler.CreateTable)
-	api.Get("/tables", tableHandler.GetAllTables)
-	api.Get("/tables/status", tableHandler.GetTablesByStatus)
+	// api.Get("/tables/status", tableHandler.GetTablesByStatus)
 
 	// PRINT ROUTES
 	log.Println("========== ROUTES ==========")
@@ -64,6 +66,6 @@ func main() {
 	log.Println("============================")
 	port := config.GetPort()
 	log.Printf("🚀 Server starting on port %s", port)
-	log.Printf("📝 Environment: %s", config.GetEnv())
+	log.Printf("📝 Environment: %s", config.GetEnv("APP_ENV", ""))
 	log.Fatal(app.Listen(port))
 }

@@ -1,6 +1,8 @@
 package response
 
 import (
+	"jello-api/internal/shared"
+
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -10,31 +12,26 @@ type Meta struct {
 	Error   interface{} `json:"error"`
 }
 
-type APIResponse struct {
-	Meta Meta        `json:"meta"`
-	Data interface{} `json:"data"`
+type APIResponse[T any] struct {
+	Meta       Meta               `json:"meta"`
+	Data       T                  `json:"data"`
+	Pagination *shared.Pagination `json:"pagination,omitempty"`
 }
 
-// SUCCESS RESPONSE
-func Success(c *fiber.Ctx, message string, data interface{}) error {
-	return c.JSON(APIResponse{
+type APIPaginationResponse[T any] struct {
+	Meta       Meta               `json:"meta"`
+	Data       T                  `json:"data"`
+	Pagination *shared.Pagination `json:"pagination,omitempty"`
+}
+
+func Success[T any](c fiber.Ctx, message string, data T, pagination *shared.Pagination) error {
+	return c.JSON(APIPaginationResponse[T]{
 		Meta: Meta{
 			Success: true,
 			Message: message,
 			Error:   nil,
 		},
-		Data: data,
-	})
-}
-
-// ERROR RESPONSE
-func Fail(c *fiber.Ctx, code int, message string, err interface{}) error {
-	return c.Status(code).JSON(APIResponse{
-		Meta: Meta{
-			Success: false,
-			Message: message,
-			Error:   err,
-		},
-		Data: nil,
+		Data:       data,
+		Pagination: pagination,
 	})
 }

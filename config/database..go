@@ -2,9 +2,7 @@ package config
 
 import (
 	"context"
-	"fmt"
 	"log"
-	"os"
 	"time"
 
 	kivik "github.com/go-kivik/kivik/v4"
@@ -16,7 +14,22 @@ type Database struct {
 	DB     *kivik.DB
 }
 
-func ConnectDB() *Database {
+// Config holds the configuration for CouchDB client
+type Config struct {
+	URL    string
+	DBName string
+}
+
+// NewClient creates a new CouchDB client from environment variables
+func NewClient(ctx context.Context) *Database {
+	cfg := Config{
+		URL:    getEnv("COUCHDB_URL", "http://admin:password@localhost:5984"),
+		DBName: getEnv("COUCHDB_NAME", "resto-app"),
+	}
+	return ConnectDB(ctx, cfg)
+}
+
+func ConnectDB(ctx context.Context, cfg Config) *Database {
 	couchURL := getEnv("COUCHDB_URL", "http://admin:password@localhost:5984/")
 	dbName := getEnv("COUCHDB_NAME", "resto-app")
 
@@ -38,7 +51,6 @@ func ConnectDB() *Database {
 		log.Fatalf("Failed to connect to CouchDB after %d attempts: %v", maxRetries, err)
 	}
 
-	ctx := context.Background()
 	version, err := client.Version(ctx)
 	if err != nil {
 		log.Fatalf("Failed to get CouchDB version: %v", err)
@@ -66,20 +78,4 @@ func ConnectDB() *Database {
 		Client: client,
 		DB:     db,
 	}
-}
-
-func getEnv(key, defaultValue string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
-	}
-	return defaultValue
-}
-
-func GetPort() string {
-	port := getEnv("APP_PORT", "3013")
-	return fmt.Sprintf(":%s", port)
-}
-
-func GetEnv() string {
-	return getEnv("APP_ENV", "development")
 }
