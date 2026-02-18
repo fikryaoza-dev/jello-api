@@ -6,7 +6,6 @@ import (
 	"jello-api/internal/domain"
 	"jello-api/internal/repository"
 	"jello-api/internal/shared"
-	"log"
 	"time"
 )
 
@@ -49,18 +48,23 @@ func (u *TableUsecase) GetAllTables(ctx context.Context, queries map[string]stri
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to get bookings: %w", err)
 	}
-	bookingMap := make(map[string]bool)
+	bookingMap := make(map[string]domain.Booking)
 	for _, b := range bookings {
-		bookingMap[b.TableID] = true
+		bookingMap[b.TableID] = domain.Booking{
+            ID:  b.ID,
+            Customer: b.Customer,
+            DurationMinutes:  b.DurationMinutes,
+        }
 	}
 	for i := range rows {
-		log.Println(rows[i].ID, bookingMap[rows[i].ID])
-		if bookingMap[rows[i].ID] {
-			rows[i].Status = "available"
-		} else {
-			rows[i].Status = "booked"
-		}
-	}
+        if detail, exists := bookingMap[rows[i].ID]; exists {
+            rows[i].Status = "booked"
+            rows[i].Booking = &detail // Assign the pointer to the struct
+        } else {
+            rows[i].Status = "available"
+            rows[i].Booking = nil // Ensure it's null if not booked
+        }
+    }
 	return rows, total, nil
 }
 
