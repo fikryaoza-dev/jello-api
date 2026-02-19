@@ -23,6 +23,10 @@ func SetupRoutes(app *fiber.App, dbClient *couchdb.Client) {
 	menuUsecase := usecase.NewMenuUsecase(menuRepo)
 	menuHandler := handler.NewMenuHandler(menuUsecase)
 
+	orderRepo := repository.NewOrderRepo(dbClient)
+	orderUsecase := usecase.NewOrderUsecase(orderRepo, menuRepo)
+	orderHandler := handler.NewOrderHandler(orderUsecase)
+
 	// Table routes
 	tables := app.Group("/api/v1/tables")
 	{
@@ -41,5 +45,10 @@ func SetupRoutes(app *fiber.App, dbClient *couchdb.Client) {
 	booking := app.Group("/api/v1/books")
 	{
 		booking.Post("/", bookingHandler.CreateBooking)
+	}
+
+	order := app.Group("/api/v1/order")
+	{
+		order.Post("/", orderHandler.CreateOrder)
 	}
 }

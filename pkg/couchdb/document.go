@@ -25,7 +25,7 @@ func (c *Client) CreateDocWithID(ctx context.Context, id string, doc interface{}
 }
 
 // GetDoc retrieves a document by ID
-func (c *Client) GetDoc(id string, result interface{}) error {
+func (c *Client) GetDoc(ctx context.Context, id string, result interface{}) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	row := c.DB.Get(ctx, id)

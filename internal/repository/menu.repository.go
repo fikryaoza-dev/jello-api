@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"jello-api/internal/domain"
+	"jello-api/internal/model"
 	"jello-api/internal/repository/mapper"
 	"jello-api/internal/shared"
 	"jello-api/pkg/couchdb"
@@ -12,6 +13,7 @@ import (
 
 type IMenuRepository interface {
 	GetAll(ctx context.Context, filter map[string]string, pagination shared.Pagination) ([]domain.Menu, int, error)
+	GetMenuByID(ctx context.Context, id string) (*domain.Menu, error)
 }
 
 type couchMenuRepo struct {
@@ -73,4 +75,13 @@ func (r *couchMenuRepo) GetAll(ctx context.Context, filter map[string]string, pa
 		total++
 	}
 	return tables, total, nil
+}
+
+func (r *couchMenuRepo) GetMenuByID(ctx context.Context, id string) (*domain.Menu, error) {
+	var model model.Menu
+	if err := r.client.GetDoc(ctx, id, &model); err != nil {
+		return nil, fmt.Errorf("menu not found: %w", err)
+	}
+	menu := mapper.MenuMapper{}.ToDomain(model)
+	return &menu, nil
 }

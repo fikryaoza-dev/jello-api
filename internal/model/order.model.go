@@ -4,7 +4,7 @@ type Order struct {
 	ID           string      `json:"_id,omitempty"`
 	Rev          string      `json:"_rev,omitempty"`
 	Type         string      `json:"type"` // Hardcoded to "order"
-	TableID      string      `json:"table_id"`
+	BookingID    string      `json:"booking_id"`
 	OrderNumber  string      `json:"order_number"`
 	CustomerName string      `json:"customer_name"`
 	TotalAmount  float64     `json:"total_amount"`

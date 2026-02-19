@@ -9,28 +9,27 @@ type OrderMapper struct{}
 
 func (o OrderMapper) ToDomain(m model.Order) domain.Order {
 	return domain.Order{
-		ID:              m.ID,
-		TableID:        m.TableID,
-		OrderNumber:         m.OrderNumber,
+		ID:           m.ID,
+		BookingID:    m.BookingID,
+		OrderNumber:  m.OrderNumber,
 		CustomerName: m.CustomerName,
-		TotalAmount: m.TotalAmount,
+		TotalAmount:  m.TotalAmount,
 		Items:        o.itemsToDomain(m.Items),
-		Status:          m.Status,
+		Status:       m.Status,
 	}
 }
 
 func (o OrderMapper) ToModel(d domain.Order) model.Order {
 	return model.Order{
-		ID:              d.ID,
-		TableID:        d.TableID,
-		OrderNumber:         d.OrderNumber,
+		ID:           d.ID,
+		BookingID:    d.BookingID,
+		OrderNumber:  d.OrderNumber,
 		CustomerName: d.CustomerName,
-		TotalAmount: d.TotalAmount,
-		Status:          string(d.Status),
+		TotalAmount:  d.TotalAmount,
+		Status:       string(d.Status),
 		Items:        o.itemsToModel(d.Items),
 	}
 }
-
 
 func (OrderMapper) itemsToDomain(moItems []model.OrderItem) []domain.OrderItem {
 	items := make([]domain.OrderItem, len(moItems))
