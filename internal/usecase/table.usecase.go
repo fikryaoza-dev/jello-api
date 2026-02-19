@@ -58,7 +58,7 @@ func (u *TableUsecase) GetAllTables(ctx context.Context, queries map[string]stri
 	}
 	for i := range rows {
         if detail, exists := bookingMap[rows[i].ID]; exists {
-            rows[i].Status = "booked"
+            rows[i].Status = "occupied"
             rows[i].Booking = &detail // Assign the pointer to the struct
         } else {
             rows[i].Status = "available"

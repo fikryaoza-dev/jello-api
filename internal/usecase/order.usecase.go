@@ -3,11 +3,11 @@ package usecase
 import "jello-api/internal/repository"
 
 type OrderUsecase struct {
-	Repo repository.IBookingRepository
+	Repo repository.IOrderRepository
 }
 
-func NewBookingUsecase(repo repository.IBookingRepository) *BookingUsecase {
-	return &BookingUsecase{
+func NewOrderUsecase(repo repository.IOrderRepository) *OrderUsecase {
+	return &OrderUsecase{
 		Repo: repo,
 	}
 }
