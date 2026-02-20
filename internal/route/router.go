@@ -20,10 +20,10 @@ func SetupRoutes(app *fiber.App, dbClient *couchdb.Client) {
 	tableHandler := handler.NewTableHandler(tableUsecase)
 
 	menuRepo := repository.NewMenuRepo(dbClient)
-	menuUsecase := usecase.NewMenuUsecase(menuRepo)
+	orderRepo := repository.NewOrderRepo(dbClient)
+	menuUsecase := usecase.NewMenuUsecase(menuRepo, orderRepo)
 	menuHandler := handler.NewMenuHandler(menuUsecase)
 
-	orderRepo := repository.NewOrderRepo(dbClient)
 	orderUsecase := usecase.NewOrderUsecase(orderRepo, menuRepo)
 	orderHandler := handler.NewOrderHandler(orderUsecase)
 

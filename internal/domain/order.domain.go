@@ -1,7 +1,5 @@
 package domain
 
-import "time"
-
 type Order struct {
 	ID           string      `json:"_id"`            // CouchDB uses _id
 	Rev          string      `json:"_rev,omitempty"` // CouchDB revision
@@ -12,7 +10,7 @@ type Order struct {
 	TotalAmount  float64     `json:"total_amount"`
 	Status       string      `json:"status"`
 	Items        []OrderItem `json:"items"`
-	CreatedAt    time.Time   `json:"created_at"`
+	CreatedAt    string   `json:"created_at"`
 }
 
 type OrderItem struct {

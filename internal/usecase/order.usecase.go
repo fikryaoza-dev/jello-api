@@ -41,7 +41,7 @@ func (u *OrderUsecase) CreateOrder(ctx context.Context, req dto.CreateOrderReque
 		Items:       items,
 		TotalAmount: total,
 		Status:      "pending",
-		CreatedAt:   now,
+		CreatedAt:   NowWIB(),
 	}
 
 	// 3. Persist
@@ -90,6 +90,11 @@ func generateOrderNumber(t time.Time) string {
 	// e.g. ORD-20240315-XXXX (last 4 chars of a uuid for uniqueness)
 	suffix := strings.ToUpper(uuid.NewString()[:4])
 	return fmt.Sprintf("ORD-%s-%s", t.Format("20060102"), suffix)
+}
+
+func NowWIB() string {
+	loc, _ := time.LoadLocation("Asia/Jakarta")
+	return time.Now().In(loc).Format("2006-01-02 15:04:05")
 }
 
 // func generateOrderNumber() string {

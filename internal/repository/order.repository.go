@@ -10,7 +10,7 @@ import (
 )
 
 type IOrderRepository interface {
-	// GetActiveByDate(ctx context.Context, date time.Time) ([]domain.Booking, error)
+	GetOrderByID(ctx context.Context, id string) (*domain.Order, error)
 	CreateOrder(ctx context.Context, d *domain.Order) (*domain.Order, error)
 }
 
@@ -25,8 +25,8 @@ func NewOrderRepo(client *couchdb.Client) IOrderRepository {
 func (r *couchOrderRepo) CreateOrder(ctx context.Context, d *domain.Order) (*domain.Order, error) {
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
-	now := time.Now().UTC()
-	d.CreatedAt = now
+	orderId, err := r.client.GenerateOrderID(ctx)
+	d.ID = orderId
 	doc := mapper.OrderMapper{}.ToModel(*d)
 	doc.Type = "order"
 
@@ -36,4 +36,30 @@ func (r *couchOrderRepo) CreateOrder(ctx context.Context, d *domain.Order) (*dom
 	}
 	d.Rev = rev
 	return d, nil
+}
+
+func (r *couchOrderRepo) GetOrderByID(ctx context.Context, id string) (*domain.Order, error) {
+	query := map[string]interface{}{
+		"selector": map[string]interface{}{
+			"booking_id": id,
+		},
+		"limit": 1,
+	}
+
+	rows, err := r.client.Find(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find tables: %w", err)
+	}
+	defer rows.Close()
+
+	if !rows.Next() {
+		return nil, fmt.Errorf("order not found")
+	}
+	var order domain.Order
+
+	if err := rows.ScanDoc(&order); err != nil {
+		return nil, err
+	}
+
+	return &order, nil
 }

@@ -26,6 +26,7 @@ func (o OrderMapper) ToModel(d domain.Order) model.Order {
 		OrderNumber:  d.OrderNumber,
 		CustomerName: d.CustomerName,
 		TotalAmount:  d.TotalAmount,
+		CreatedAt:  d.CreatedAt,
 		Status:       string(d.Status),
 		Items:        o.itemsToModel(d.Items),
 	}

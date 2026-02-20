@@ -19,7 +19,7 @@ type Customer struct {
 
 type Booking struct {
 	ID              string        `json:"id"`
-	Customer        string        `json:"customer"`
+	Customer        string        `json:"customer_name"`
 	TableID         string        `json:"tableId"`
 	DurationMinutes int           `json:"durationMinutes"`
 	Status          BookingStatus `json:"status"`

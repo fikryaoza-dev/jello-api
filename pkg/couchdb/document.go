@@ -26,11 +26,12 @@ func (c *Client) CreateDocWithID(ctx context.Context, id string, doc interface{}
 
 // GetDoc retrieves a document by ID
 func (c *Client) GetDoc(ctx context.Context, id string, result interface{}) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 	row := c.DB.Get(ctx, id)
-	if err := row.Err; err != nil {
-		return fmt.Errorf("failed to get document: %w", err)
+	if err := row.Err(); err != nil {
+		// return fmt.Errorf("failed to get document: %w", err)
+		return fmt.Errorf("get doc id=%s db=%s: %w", id, c.DB.Name(), err)
 	}
 
 	if err := row.ScanDoc(result); err != nil {
@@ -38,6 +39,41 @@ func (c *Client) GetDoc(ctx context.Context, id string, result interface{}) erro
 	}
 
 	return nil
+}
+
+func (c *Client) GenerateOrderID(ctx context.Context) (string, error) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	var counter struct {
+		ID  string `json:"_id"`
+		Rev string `json:"_rev"`
+		Seq int    `json:"seq"`
+	}
+
+	// ambil counter
+	row := c.DB.Get(ctx, "counter::order")
+	if err := row.Err(); err != nil {
+		return "", err
+	}
+	if err := row.ScanDoc(&counter); err != nil {
+		return "", err
+	}
+
+	// increment
+	counter.Seq++
+
+	// simpan kembali
+	rev, err := c.DB.Put(ctx, counter.ID, counter)
+	if err != nil {
+		return "", err
+	}
+	counter.Rev = rev
+
+	// format ID
+	orderID := fmt.Sprintf("ORDER-%05d", counter.Seq)
+
+	return orderID, nil
 }
 
 // UpdateDoc updates an existing document
@@ -81,7 +117,7 @@ func (c *Client) UpdateDoc(ctx context.Context, id string, doc interface{}) (str
 // // DocExists checks if a document exists
 // func (c *Client) DocExists(ctx context.Context, id string) (bool, error) {
 // 	row := c.DB.Get(ctx, id)
-// 	if row.Err != nil {
+// 	if row.Err() != nil {
 // 		// Check if it's a not found error
 // 		if kivik.StatusCode(row.Err) == 404 {
 // 			return false, nil
@@ -94,7 +130,7 @@ func (c *Client) UpdateDoc(ctx context.Context, id string, doc interface{}) (str
 // // GetDocRev retrieves only the revision of a document
 // func (c *Client) GetDocRev(ctx context.Context, id string) (string, error) {
 // 	row := c.DB.Get(ctx, id)
-// 	if err := row.Err; err != nil {
+// 	if err := row.Err(); err != nil {
 // 		return "", fmt.Errorf("failed to get document: %w", err)
 // 	}
 // 	return row.Rev, nil

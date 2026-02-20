@@ -19,6 +19,7 @@ type Menu struct {
 	Description string     `json:"description"`
 	Category    string     `json:"category"`
 	Price       float64    `json:"price"`
+	Quantity       int64    `json:"quantity"`
 	Status      MenuStatus `json:"status"`
 	CreatedAt   time.Time  `json:"createdAt"`
 	UpdatedAt   time.Time  `json:"updatedAt"`
