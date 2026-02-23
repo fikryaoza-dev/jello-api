@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"time"
+
+	"github.com/go-kivik/kivik/v4"
 )
 
 // CreateDoc creates a new document using Kivik
@@ -85,14 +87,14 @@ func (c *Client) UpdateDoc(ctx context.Context, id string, doc interface{}) (str
 	return rev, nil
 }
 
-// // UpdateDocWithRev updates an existing document with explicit revision
-// func (c *Client) UpdateDocWithRev(ctx context.Context, id, rev string, doc interface{}) (string, error) {
-// 	newRev, err := c.DB.Put(ctx, id, doc, kivik.Rev(rev))
-// 	if err != nil {
-// 		return "", fmt.Errorf("failed to update document: %w", err)
-// 	}
-// 	return newRev, nil
-// }
+// UpdateDocWithRev updates an existing document with explicit revision
+func (c *Client) UpdateDocWithRev(ctx context.Context, id, rev string, doc interface{}) (string, error) {
+	newRev, err := c.DB.Put(ctx, id, doc, kivik.Rev(rev))
+	if err != nil {
+		return "", fmt.Errorf("failed to update document: %w", err)
+	}
+	return newRev, nil
+}
 
 // // DeleteDoc deletes a document
 // func (c *Client) DeleteDoc(ctx context.Context, id, rev string) error {

@@ -6,16 +6,16 @@ import (
 	"jello-api/internal/domain"
 	"jello-api/internal/repository"
 	"jello-api/internal/shared"
-	"time"
 )
 
 type TableUsecase struct {
 	Repo        repository.ITableRepository
 	BookingRepo repository.IBookingRepository
+	OrderRepo   repository.IOrderRepository
 }
 
-func NewTableUsecase(repo repository.ITableRepository, bookRepo repository.IBookingRepository) *TableUsecase {
-	return &TableUsecase{Repo: repo, BookingRepo: bookRepo}
+func NewTableUsecase(repo repository.ITableRepository, bookRepo repository.IBookingRepository, orderRepo repository.IOrderRepository) *TableUsecase {
+	return &TableUsecase{Repo: repo, BookingRepo: bookRepo, OrderRepo: orderRepo}
 }
 
 func (u *TableUsecase) CreateTable(ctx context.Context, table *domain.Table) error {
@@ -32,39 +32,34 @@ func (u *TableUsecase) GetAllTables(ctx context.Context, queries map[string]stri
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to find tables: %w", err)
 	}
-	// 3️⃣ Ambil booking aktif di tanggal itu
-	now := time.Now().UTC()
-	today := time.Date(
-		now.Year(),
-		now.Month(),
-		now.Day(),
-		0, 0, 0, 0,
-		time.UTC,
-	)
 	if err != nil {
 		return nil, 0, fmt.Errorf("invalid date format")
 	}
-	bookings, err := u.BookingRepo.GetActiveByDate(ctx, today)
+	orders, err := u.OrderRepo.GetActiveOrders(ctx)
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to get bookings: %w", err)
 	}
-	bookingMap := make(map[string]domain.Booking)
-	for _, b := range bookings {
-		bookingMap[b.TableID] = domain.Booking{
-            ID:  b.ID,
-            Customer: b.Customer,
-            DurationMinutes:  b.DurationMinutes,
-        }
+	orderMap := make(map[string]domain.Order, len(orders))
+	for _, b := range orders {
+		orderMap[b.TableID] = domain.Order{
+			ID:           b.ID,
+			Type:         b.Type,
+			CustomerName: b.CustomerName,
+			OrderNumber:  b.OrderNumber,
+			Status:       b.Status,
+			TableID:      b.TableID,
+			Items:        b.Items,
+		}
 	}
 	for i := range rows {
-        if detail, exists := bookingMap[rows[i].ID]; exists {
-            rows[i].Status = "occupied"
-            rows[i].Booking = &detail // Assign the pointer to the struct
-        } else {
-            rows[i].Status = "available"
-            rows[i].Booking = nil // Ensure it's null if not booked
-        }
-    }
+		if detail, exists := orderMap[rows[i].ID]; exists {
+			rows[i].Status = "occupied"
+			rows[i].Order = &detail // Assign the pointer to the struct
+		} else {
+			rows[i].Status = "available"
+			rows[i].Order = nil // Ensure it's null if not booked
+		}
+	}
 	return rows, total, nil
 }
 

@@ -4,6 +4,7 @@ type Order struct {
 	ID           string      `json:"_id,omitempty"`
 	Rev          string      `json:"_rev,omitempty"`
 	Type         string      `json:"type"` // Hardcoded to "order"
+	TableID      string      `json:"table_id"`
 	BookingID    string      `json:"booking_id"`
 	OrderNumber  string      `json:"order_number"`
 	CustomerName string      `json:"customer_name"`
@@ -14,10 +15,13 @@ type Order struct {
 }
 
 type OrderItem struct {
-	MenuID   string  `json:"menu_id"`
-	MenuName string  `json:"menu_name"`
-	Price    float64 `json:"price"`
-	Quantity int     `json:"quantity"`
-	Subtotal float64 `json:"subtotal"`
-	Notes    string  `json:"notes"`
+	ID        string  `json:"_id,omitempty"`
+	MenuID    string  `json:"menu_id"`
+	MenuName  string  `json:"menu_name"`
+	Price     float64 `json:"price"`
+	Quantity  int     `json:"quantity"`
+	Subtotal  float64 `json:"subtotal"`
+	Status    string  `json:"status"`
+	Notes     string  `json:"notes"`
+	UpdatedAt string  `json:"updated_at"`
 }

@@ -9,11 +9,12 @@ const (
 )
 
 type Table struct {
-	ID       string `json:"id,omitempty"`
-	Rev      string `json:"rev,omitempty"`
-	Name     string `json:"name,omitempty"`
-	Capacity int    `json:"capacity"`
-	Area     string `json:"area"`
-	Booking  *Booking `json:"booking"`
+	ID       string      `json:"id,omitempty"`
+	Rev      string      `json:"rev,omitempty"`
+	Name     string      `json:"name,omitempty"`
+	Capacity int         `json:"capacity"`
+	Area     string      `json:"area"`
+	Order    *Order      `json:"order"`
+	Booking  *Booking    `json:"booking"`
 	Status   TableStatus `json:"status,omitempty"`
 }

@@ -15,12 +15,12 @@ func SetupRoutes(app *fiber.App, dbClient *couchdb.Client) {
 	bookingUsecase := usecase.NewBookingUsecase(bookingRepo)
 	bookingHandler := handler.NewBookingHandler(bookingUsecase)
 
+	orderRepo := repository.NewOrderRepo(dbClient)
 	tableRepo := repository.NewTableRepo(dbClient)
-	tableUsecase := usecase.NewTableUsecase(tableRepo, bookingRepo)
+	tableUsecase := usecase.NewTableUsecase(tableRepo, bookingRepo, orderRepo)
 	tableHandler := handler.NewTableHandler(tableUsecase)
 
 	menuRepo := repository.NewMenuRepo(dbClient)
-	orderRepo := repository.NewOrderRepo(dbClient)
 	menuUsecase := usecase.NewMenuUsecase(menuRepo, orderRepo)
 	menuHandler := handler.NewMenuHandler(menuUsecase)
 
@@ -49,6 +49,12 @@ func SetupRoutes(app *fiber.App, dbClient *couchdb.Client) {
 
 	order := app.Group("/api/v1/order")
 	{
+		order.Get("/items/pending", orderHandler.GetAllPendingOrderItems)
+		order.Get("/items/status/ready", orderHandler.GetAllReadyOrderItems)
+		order.Get("/items/status/served", orderHandler.GetAllServedOrderItems)
 		order.Post("/", orderHandler.CreateOrder)
+		order.Put("/:id", orderHandler.UpdateOrder)
+		order.Put("/items/status", orderHandler.UpdateOrderItemStatus)
+		order.Put("/items/note", orderHandler.UpdateOrderItemNote)
 	}
 }
