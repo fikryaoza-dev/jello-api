@@ -135,6 +135,21 @@ func (h *OrderHandler) GetAllServedOrderItems(c *fiber.Ctx) error {
 	})
 }
 
+func (h *OrderHandler) GetAllActiveOrders(c *fiber.Ctx) error {
+	result, err := h.Usecase.GetActiveOrders(c.Context())
+	if err != nil {
+		log.Println(err)
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "error get served order items. ",
+		})
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"message": "Success Get List Order",
+		"data":    result,
+	})
+}
+
 func (h *OrderHandler) UpdateOrderItemStatus(c *fiber.Ctx) error {
 	var req dto.UpdateOrderItemStatusRequest
 	if err := c.BodyParser(&req); err != nil {

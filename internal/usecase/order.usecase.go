@@ -175,6 +175,15 @@ func (u *OrderUsecase) GetAllReadyOrderItems(ctx context.Context) ([]domain.Orde
 	return items, nil
 }
 
+func (u *OrderUsecase) GetActiveOrders(ctx context.Context) ([]domain.Order, error) {
+	items, err := u.Repo.GetActiveOrders(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get ready order items: %w", err)
+	}
+
+	return items, nil
+}
+
 func (u *OrderUsecase) GetAllServedOrderItems(ctx context.Context) ([]domain.OrderItem, error) {
 	items, err := u.Repo.GetAllServedOrderItems(ctx)
 	if err != nil {

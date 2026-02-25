@@ -52,6 +52,7 @@ func SetupRoutes(app *fiber.App, dbClient *couchdb.Client) {
 		order.Get("/items/pending", orderHandler.GetAllPendingOrderItems)
 		order.Get("/items/status/ready", orderHandler.GetAllReadyOrderItems)
 		order.Get("/items/status/served", orderHandler.GetAllServedOrderItems)
+		order.Get("/active", orderHandler.GetAllActiveOrders)
 		order.Post("/", orderHandler.CreateOrder)
 		order.Put("/:id", orderHandler.UpdateOrder)
 		order.Put("/items/status", orderHandler.UpdateOrderItemStatus)

@@ -220,7 +220,7 @@ func (r *couchOrderRepo) UpdateOrderItemStatus(ctx context.Context, orderID, men
 	if !found {
 		return nil, fmt.Errorf("menu item '%s' not found in order", menuID)
 	}
-
+	existing.Status = "served"
 	// 3. Map to model and persist
 	m := mapper.OrderMapper{}.ToModel(*existing)
 	newRev, err := r.client.UpdateDocWithRev(ctx, m.ID, m.Rev, m)
