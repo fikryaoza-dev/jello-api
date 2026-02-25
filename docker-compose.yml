@@ -7,9 +7,9 @@ services:
     image: jello-api:v1
     ports:
       - "3013:3013"
-    volumes:
-      # - ../uploads:/app/uploads
-      # - ../public:/app/public
+    # volumes:
+    # - ../uploads:/app/uploads
+    # - ../public:/app/public
     labels:
       io.portainer.accesscontrol.teams: fw-backend
     networks:
