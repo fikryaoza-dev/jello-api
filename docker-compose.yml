@@ -23,9 +23,10 @@ services:
           cpus: "0.1"
           memory: 128M
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
       - TZ=Asia/Jakarta
-      - DOPPLER_TOKEN=${DOPPLER_TOKEN}
 networks:
   backend:
     name: micro__services_network
