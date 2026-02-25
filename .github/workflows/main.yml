@@ -61,5 +61,6 @@ jobs:
               "amqp_config": {
                 "rabbitmq_host": "${{ secrets.RABBITMQ_HOST }}",
                 "rabbitmq_token": "${{ secrets.RABBITMQ_TOKEN }}"
-              }
+              },
+              "doppler_token": "${{ secrets.DOPPLER_TOKEN }}"
             }
