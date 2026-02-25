@@ -1,0 +1,31 @@
+services:
+  insurance-admin-api:
+    container_name: jello-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: jello-api:v1
+    ports:
+      - "3013:3013"
+    volumes:
+      # - ../uploads:/app/uploads
+      # - ../public:/app/public
+    labels:
+      io.portainer.accesscontrol.teams: fw-backend
+    networks:
+      - backend
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.1"
+          memory: 128M
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Jakarta
+networks:
+  backend:
+    name: micro__services_network
+    external: true
