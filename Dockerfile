@@ -15,12 +15,20 @@ RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 \
     -tags musl \
     -o jello-api ./main.go
 
+
 FROM alpine:3.22.0 AS final
 
 WORKDIR /app
+
+# Install curl
+RUN apk add --no-cache curl
+
+# Install Doppler CLI
+RUN curl -Ls https://cli.doppler.com/install.sh | sh
 
 COPY --from=builder /app/jello-api .
 
 EXPOSE 3013
 
-ENTRYPOINT ["./jello-api"]
+# Use doppler run to inject secrets
+ENTRYPOINT ["doppler", "run", "--", "./jello-api"]
