@@ -20,8 +20,8 @@ FROM alpine:3.22.0 AS final
 
 WORKDIR /app
 
-# Install curl
-RUN apk add --no-cache curl
+# Install required packages
+RUN apk add --no-cache curl gnupg
 
 # Install Doppler CLI
 RUN curl -Ls https://cli.doppler.com/install.sh | sh
@@ -30,5 +30,4 @@ COPY --from=builder /app/jello-api .
 
 EXPOSE 3013
 
-# Use doppler run to inject secrets
 ENTRYPOINT ["doppler", "run", "--", "./jello-api"]
