@@ -13,7 +13,7 @@ RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 \
     go build -installsuffix cgo \
     -ldflags="-s -w -extldflags '-static'" \
     -tags musl \
-    -o jello-api ./cmd/main.go
+    -o jello-api ./main.go
 
 FROM alpine:3.22.0 AS final
 
