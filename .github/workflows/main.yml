@@ -1,0 +1,65 @@
+name: Hugtech CD
+
+on:
+  push:
+    branches: [dev]
+
+env:
+  PROJECT_NAME: jello-api
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Extract branch name
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: echo "BRANCH_RELEASE_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
+        id: extract_branch
+
+      - name: Set project name based on branch name
+        if: ${{ !contains(env.BRANCH_RELEASE_NAME, 'release/') }}
+        shell: bash
+        run: echo "PROJECT_NAME=${{ env.PROJECT_NAME }}-dev" >> $GITHUB_ENV
+        id: project_name_with_branch
+
+      - name: Install Doppler CLI
+        uses: dopplerhq/cli-action@v3
+
+      - name: Fetch secrets from Doppler
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+        run: |
+          doppler secrets download --no-file --format env > doppler.env
+          while IFS='=' read -r key value; do
+            echo "$key=$value" >> $GITHUB_ENV
+          done < doppler.env
+          rm doppler.env
+
+      - name: Publish message to RabbitMQ
+        uses: fikryaoza-dev/amqp-publisher@v1.0
+        env:
+          DEPLOY_ENV: ${{ github.ref_name == 'dev' && '/dev' || '' }}
+        with:
+          payload: >
+            {
+              "app": {
+                "name": "${{ github.event.repository.name }}",
+                "path": "/home/ci_admin/apps/api${{ env.DEPLOY_ENV }}"
+              },
+              "ssh_config": {
+                "host": "${{ secrets.HOST }}",
+                "username": "${{ secrets.USERNAME }}",
+                "password": "${{ secrets.PASSWD }}"
+              },
+              "repository": {
+                "https_pat_url": "https://$username:$pat@github.com/${{ github.repository }}.git",
+                "ssh_url": "git@github.com:${{ github.repository }}.git",
+                "branch_name": "${{ env.BRANCH_RELEASE_NAME }}"
+              },
+              "amqp_config": {
+                "rabbitmq_host": "${{ secrets.RABBITMQ_HOST }}",
+                "rabbitmq_token": "${{ secrets.RABBITMQ_TOKEN }}"
+              }
+            }
