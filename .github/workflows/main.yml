@@ -2,7 +2,7 @@ name: Hugtech CD
 
 on:
   push:
-    branches: [dev]
+    branches: [sit]
 
 env:
   PROJECT_NAME: jello-api
